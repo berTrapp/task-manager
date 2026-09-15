@@ -24,14 +24,18 @@ App de gestão de demandas em Next.js com grupos, um quadro Kanban por grupo
   - **Por usuário**: abas para focar no quadro de 3 colunas de uma pessoa
     por vez.
 - Atualização otimista da UI com reversão automática se a gravação falhar.
+- **Tempo real**: mudanças feitas por outras pessoas no mesmo grupo (mover,
+  criar, editar, excluir demanda) aparecem sozinhas, sem precisar atualizar
+  a página — via Supabase Realtime.
 
 ## Configuração
 
 1. Crie um projeto em [supabase.com](https://supabase.com).
 2. No SQL Editor do projeto, rode o conteúdo de
    [`supabase/schema.sql`](supabase/schema.sql). O script é idempotente —
-   se você já tinha rodado uma versão anterior (só com a tabela `tasks`),
-   rodar de novo adiciona as tabelas de grupos sem apagar nada.
+   se você já tinha rodado uma versão anterior, rodar de novo só adiciona o
+   que estiver faltando (tabelas de grupos, policies de leitura para o
+   tempo real, etc.) sem apagar nada.
 3. Copie `.env.local.example` para `.env.local` e preencha com a URL, a
    **publishable key** e a **secret key** do projeto (Project Settings →
    API):
@@ -96,14 +100,23 @@ os passos acima em vez de quebrar.
   visualizações do quadro.
 - `src/components/GroupBoard.tsx` — orquestra o quadro (as duas
   visualizações), o drag-and-drop e os modais.
+- `src/hooks/useGroupRealtimeTasks.ts` + `src/lib/supabase/browser.ts` —
+  assinatura Realtime read-only do navegador para a tabela `tasks` do
+  grupo aberto. Só escuta; toda escrita continua indo pelas Server Actions
+  com a service role key. A escuta só entrega eventos que passam pela RLS
+  policy de leitura (ver abaixo), então um usuário nunca recebe eventos de
+  um grupo do qual não é membro.
 - `src/lib/supabase/server.ts` — cliente Supabase server-only (service
   role), usado só para acesso a dados, nunca para autenticação.
 - `supabase/schema.sql` — schema completo (`profiles`, `groups`,
-  `group_members`, `group_invites`, `tasks`), incluindo RLS habilitada em
-  todas as tabelas (sem policies públicas: todo o acesso a dados passa pelo
-  server via service role, gated pelas checagens de autenticação/membership
-  em cada action). `profiles` espelha `auth.users` via trigger, porque
-  `auth.users` não é consultável pela API normal do Postgres.
+  `group_members`, `group_invites`, `tasks`). RLS habilitada em todas as
+  tabelas; a única exceção às "sem policies públicas" são duas policies de
+  **leitura** (`group_members` e `tasks`, escopadas por participação no
+  grupo) que existem só para o Realtime funcionar — nenhuma policy de
+  escrita existe em lugar nenhum, então o navegador nunca consegue gravar
+  direto no Postgres, só o server via service role. `profiles` espelha
+  `auth.users` via trigger, porque `auth.users` não é consultável pela API
+  normal do Postgres.
 
 ## Scripts
 

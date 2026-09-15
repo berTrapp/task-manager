@@ -66,12 +66,12 @@ export default function TaskCard({ task, onEdit, onDelete, dragging }: Props) {
         {task.description}
       </p>
 
-      <p className="mt-1 text-xs text-black/60 dark:text-white/60">
+      <p className="mt-1 text-xs text-black/60 dark:text-white/60 truncate">
         Solicitante: <span className="font-medium">{task.requester}</span>
       </p>
 
       {task.observations && (
-        <p className="mt-1 line-clamp-2 text-xs text-black/50 dark:text-white/50">
+        <p className="mt-1 line-clamp-2 text-xs text-black/50 dark:text-white/50 truncate">
           {task.observations}
         </p>
       )}
