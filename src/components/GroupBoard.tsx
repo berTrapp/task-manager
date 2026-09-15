@@ -15,6 +15,7 @@ import {
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { deleteTask, reorderTasks } from "@/app/actions";
 import { computeCellDrop } from "@/lib/kanban-dnd";
+import { useGroupRealtimeTasks } from "@/hooks/useGroupRealtimeTasks";
 import type { GroupMember, Task, TaskStatus } from "@/lib/types";
 import SwimlaneGrid, { swimlaneCellKey } from "./SwimlaneGrid";
 import UserTabsBoard from "./UserTabsBoard";
@@ -62,6 +63,8 @@ export default function GroupBoard({
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
+
+  useGroupRealtimeTasks(groupId, setTasks);
 
   function cellKeyOf(task: Task): string {
     if (view === "swimlane") return swimlaneCellKey(task.assignee_id, task.status);

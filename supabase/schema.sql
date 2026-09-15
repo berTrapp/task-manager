@@ -123,13 +123,46 @@ create trigger tasks_set_updated_at
 before update on tasks
 for each row execute function set_updated_at();
 
--- Row Level Security is enabled with no public policies on every table
--- below: the app talks to Postgres exclusively through the server (service
--- role key), which bypasses RLS, and enforces group membership/roles in
--- application code (see src/app/*actions.ts). Nothing here is reachable
--- directly from the browser.
+-- Row Level Security is enabled on every table below. All writes still go
+-- exclusively through the server (service role key), which bypasses RLS,
+-- and application code enforces group membership/roles before any write
+-- (see src/app/*actions.ts). The two SELECT policies below are the one
+-- exception: they let an authenticated browser session read its own
+-- membership rows and the tasks of groups it belongs to, which is what
+-- lets Supabase Realtime deliver "postgres_changes" events straight to the
+-- browser (Realtime enforces RLS using the subscriber's own session, not
+-- the service role) — see src/hooks/useGroupRealtimeTasks.ts. No INSERT/
+-- UPDATE/DELETE policies exist anywhere, so the browser can still only
+-- ever read, never write, directly against Postgres.
 alter table profiles enable row level security;
 alter table groups enable row level security;
 alter table group_members enable row level security;
 alter table group_invites enable row level security;
 alter table tasks enable row level security;
+
+drop policy if exists select_own_membership on group_members;
+create policy select_own_membership on group_members
+  for select
+  using (user_id = auth.uid());
+
+drop policy if exists select_group_tasks on tasks;
+create policy select_group_tasks on tasks
+  for select
+  using (
+    exists (
+      select 1 from group_members gm
+      where gm.group_id = tasks.group_id and gm.user_id = auth.uid()
+    )
+  );
+
+-- Add `tasks` to the realtime publication so subscribed browsers receive
+-- INSERT/UPDATE/DELETE events (subject to the RLS policy above).
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'tasks'
+  ) then
+    alter publication supabase_realtime add table public.tasks;
+  end if;
+end $$;
