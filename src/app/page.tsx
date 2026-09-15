@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import { getTasks } from "@/app/actions";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/supabase/auth";
-import Board from "@/components/Board";
+import { listMyGroups } from "@/app/groups/actions";
 import SetupNotice from "@/components/SetupNotice";
 import SignOutButton from "@/components/SignOutButton";
+import GroupList from "@/components/GroupList";
 
 export default async function Home() {
   if (!isSupabaseConfigured()) {
@@ -14,7 +14,8 @@ export default async function Home() {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const tasks = await getTasks();
+  const result = await listMyGroups();
+  if (!result.ok) throw new Error(result.error);
 
   return (
     <main className="flex min-h-screen flex-col">
@@ -24,7 +25,7 @@ export default async function Home() {
             Gestão de Demandas
           </h1>
           <p className="text-sm text-black/60 dark:text-white/60">
-            Acompanhe demandas do quadro Aberto → Desenvolvimento → Concluído.
+            Escolha um grupo para ver o quadro de demandas.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-3">
@@ -35,7 +36,7 @@ export default async function Home() {
         </div>
       </header>
       <div className="flex-1 px-4 py-6 sm:px-8">
-        <Board initialTasks={tasks} />
+        <GroupList initialGroups={result.data} />
       </div>
     </main>
   );

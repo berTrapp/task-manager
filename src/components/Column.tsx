@@ -4,6 +4,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import type { Task, TaskStatus } from "@/lib/types";
 import { STATUS_LABELS } from "@/lib/types";
+import { cellDroppableId } from "@/lib/kanban-dnd";
 import TaskCard from "./TaskCard";
 
 type Props = {
@@ -21,7 +22,7 @@ const COLUMN_ACCENTS: Record<TaskStatus, string> = {
 };
 
 export default function Column({ status, tasks, onEditTask, onDeleteTask, onAddTask }: Props) {
-  const { setNodeRef, isOver } = useDroppable({ id: `col:${status}` });
+  const { setNodeRef, isOver } = useDroppable({ id: cellDroppableId(status) });
   const ids = tasks.map((t) => t.id);
 
   return (
