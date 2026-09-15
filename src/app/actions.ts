@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentUser } from "@/lib/supabase/auth";
 import { TASK_STATUSES, TASK_URGENCIES, type Task } from "@/lib/types";
 
 const taskInputSchema = z.object({
@@ -25,6 +26,8 @@ export type ActionResult<T = undefined> =
 
 async function runAction<T>(fn: () => Promise<ActionResult<T>>): Promise<ActionResult<T>> {
   try {
+    const user = await getCurrentUser();
+    if (!user) return { ok: false, error: "Não autenticado." };
     return await fn();
   } catch (err) {
     return {
@@ -35,6 +38,9 @@ async function runAction<T>(fn: () => Promise<ActionResult<T>>): Promise<ActionR
 }
 
 export async function getTasks(): Promise<Task[]> {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Não autenticado.");
+
   const supabase = getSupabaseServerClient();
   const { data, error } = await supabase
     .from("tasks")
