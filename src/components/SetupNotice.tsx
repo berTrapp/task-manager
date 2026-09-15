@@ -27,9 +27,15 @@ export default function SetupNotice() {
             <code className="rounded bg-black/10 px-1 py-0.5 text-xs dark:bg-white/10">
               .env.local
             </code>{" "}
-            e preencha com a URL e a{" "}
-            <span className="font-medium">service role key</span> do seu
-            projeto (Project Settings → API).
+            e preencha com a URL, a{" "}
+            <span className="font-medium">publishable key</span> e a{" "}
+            <span className="font-medium">secret key</span> do seu projeto
+            (Project Settings → API).
+          </li>
+          <li>
+            Crie os usuários que poderão fazer login em Authentication →
+            Users no painel do Supabase (não há cadastro público nesta
+            aplicação).
           </li>
           <li>Reinicie o servidor de desenvolvimento.</li>
         </ol>

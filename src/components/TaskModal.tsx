@@ -7,22 +7,39 @@ import {
   TASK_STATUSES,
   TASK_URGENCIES,
   URGENCY_LABELS,
+  displayName,
+  type GroupMember,
   type Task,
   type TaskStatus,
   type TaskUrgency,
 } from "@/lib/types";
 
 type Props = {
+  groupId: string;
+  members: GroupMember[];
   mode: "create" | "edit";
   task?: Task;
   initialStatus?: TaskStatus;
+  initialAssigneeId?: string | null;
   onClose: () => void;
   onSaved: (task: Task, mode: "create" | "edit") => void;
 };
 
-export default function TaskModal({ mode, task, initialStatus, onClose, onSaved }: Props) {
+export default function TaskModal({
+  groupId,
+  members,
+  mode,
+  task,
+  initialStatus,
+  initialAssigneeId,
+  onClose,
+  onSaved,
+}: Props) {
   const [description, setDescription] = useState(task?.description ?? "");
   const [requester, setRequester] = useState(task?.requester ?? "");
+  const [assigneeId, setAssigneeId] = useState<string>(
+    task?.assignee_id ?? initialAssigneeId ?? ""
+  );
   const [urgency, setUrgency] = useState<TaskUrgency>(task?.urgency ?? "media");
   const [status, setStatus] = useState<TaskStatus>(task?.status ?? initialStatus ?? "aberto");
   const [observations, setObservations] = useState(task?.observations ?? "");
@@ -50,13 +67,16 @@ export default function TaskModal({ mode, task, initialStatus, onClose, onSaved 
     const input = {
       description: description.trim(),
       requester: requester.trim(),
+      assignee_id: assigneeId || null,
       urgency,
       observations: observations.trim() || null,
       status,
     };
 
     const result =
-      mode === "create" ? await createTask(input) : await updateTask(task!.id, input);
+      mode === "create"
+        ? await createTask(groupId, input)
+        : await updateTask(groupId, task!.id, input);
     setPending(false);
 
     if (!result.ok) {
@@ -98,6 +118,21 @@ export default function TaskModal({ mode, task, initialStatus, onClose, onSaved 
               className={inputClass}
               placeholder="Quem pediu essa demanda?"
             />
+          </Field>
+
+          <Field label="Responsável">
+            <select
+              value={assigneeId}
+              onChange={(e) => setAssigneeId(e.target.value)}
+              className={inputClass}
+            >
+              <option value="">Sem responsável</option>
+              {members.map((m) => (
+                <option key={m.user_id} value={m.user_id}>
+                  {displayName(m.profile)}
+                </option>
+              ))}
+            </select>
           </Field>
 
           <div className="grid grid-cols-2 gap-3">
