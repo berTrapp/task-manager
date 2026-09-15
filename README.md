@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Gestão de Demandas
 
-## Getting Started
+App de gestão de demandas em Next.js com um quadro Kanban (Aberto →
+Desenvolvimento → Concluído) e Supabase Postgres como backend.
 
-First, run the development server:
+## Funcionalidades
+
+- CRUD de demandas: descrição, solicitante, urgência (baixa/média/alta) e
+  observações.
+- Quadro Kanban com arrastar-e-soltar (via [dnd-kit](https://dndkit.com/))
+  para mudar o status e reordenar demandas dentro de uma coluna.
+- Atualização otimista da UI com reversão automática se a gravação falhar.
+
+## Configuração
+
+1. Crie um projeto em [supabase.com](https://supabase.com).
+2. No SQL Editor do projeto, rode o conteúdo de
+   [`supabase/schema.sql`](supabase/schema.sql).
+3. Copie `.env.local.example` para `.env.local` e preencha com a URL e a
+   **service role key** do projeto (Project Settings → API):
+
+   ```bash
+   cp .env.local.example .env.local
+   ```
+
+4. Instale as dependências e rode o servidor de desenvolvimento:
+
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+5. Abra [http://localhost:3000](http://localhost:3000).
+
+Sem as variáveis de ambiente configuradas, o app mostra uma tela explicando
+os passos acima em vez de quebrar.
+
+## Arquitetura
+
+- `src/app/actions.ts` — Server Actions para CRUD e reordenação, usando a
+  service role key do Supabase (nunca exposta ao navegador).
+- `src/components/Board.tsx` — orquestra o quadro Kanban, o drag-and-drop e
+  os modais de criação/edição/exclusão.
+- `src/lib/supabase/server.ts` — cliente Supabase server-only.
+- `supabase/schema.sql` — schema da tabela `tasks`, incluindo RLS habilitada
+  (sem policies públicas: todo o acesso passa pelo server via service role).
+
+## Scripts
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run dev     # servidor de desenvolvimento
+npm run build   # build de produção
+npm run start   # servidor de produção
+npm run lint    # eslint
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
