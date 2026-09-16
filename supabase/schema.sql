@@ -166,3 +166,10 @@ begin
     alter publication supabase_realtime add table public.tasks;
   end if;
 end $$;
+
+-- By default Postgres only replicates a deleted row's primary key, not its
+-- other columns. Our RLS policy above needs `group_id` to decide who gets
+-- to see the delete event — without the full old row, that check can never
+-- pass, so DELETE events would silently never reach any browser. FULL
+-- keeps every column of the old row available for that check.
+alter table tasks replica identity full;
