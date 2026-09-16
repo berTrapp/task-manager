@@ -13,6 +13,7 @@ type Props = {
   onSelectUser: (userId: string) => void;
   onEditTask: (task: Task) => void;
   onDeleteTask: (task: Task) => void;
+  onDuplicateTask: (task: Task) => void;
   onAddTask: (status: TaskStatus) => void;
 };
 
@@ -23,6 +24,7 @@ export default function UserTabsBoard({
   onSelectUser,
   onEditTask,
   onDeleteTask,
+  onDuplicateTask,
   onAddTask,
 }: Props) {
   const tabs = useMemo(
@@ -72,6 +74,7 @@ export default function UserTabsBoard({
             tasks={columns[status]}
             onEditTask={onEditTask}
             onDeleteTask={onDeleteTask}
+            onDuplicateTask={onDuplicateTask}
             onAddTask={onAddTask}
           />
         ))}

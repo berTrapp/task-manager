@@ -12,6 +12,7 @@ type Props = {
   tasks: Task[];
   onEditTask: (task: Task) => void;
   onDeleteTask: (task: Task) => void;
+  onDuplicateTask: (task: Task) => void;
   onAddTask: (status: TaskStatus) => void;
 };
 
@@ -21,7 +22,14 @@ const COLUMN_ACCENTS: Record<TaskStatus, string> = {
   concluido: "border-t-emerald-500",
 };
 
-export default function Column({ status, tasks, onEditTask, onDeleteTask, onAddTask }: Props) {
+export default function Column({
+  status,
+  tasks,
+  onEditTask,
+  onDeleteTask,
+  onDuplicateTask,
+  onAddTask,
+}: Props) {
   const { setNodeRef, isOver } = useDroppable({ id: cellDroppableId(status) });
   const ids = tasks.map((t) => t.id);
 
@@ -49,6 +57,7 @@ export default function Column({ status, tasks, onEditTask, onDeleteTask, onAddT
               task={task}
               onEdit={() => onEditTask(task)}
               onDelete={() => onDeleteTask(task)}
+              onDuplicate={() => onDuplicateTask(task)}
             />
           ))}
         </SortableContext>

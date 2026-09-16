@@ -10,10 +10,11 @@ type Props = {
   task: Task;
   onEdit: () => void;
   onDelete: () => void;
+  onDuplicate: () => void;
   dragging?: boolean;
 };
 
-export default function TaskCard({ task, onEdit, onDelete, dragging }: Props) {
+export default function TaskCard({ task, onEdit, onDelete, onDuplicate, dragging }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: task.id });
 
@@ -49,6 +50,15 @@ export default function TaskCard({ task, onEdit, onDelete, dragging }: Props) {
             aria-label="Editar demanda"
           >
             <PencilIcon />
+          </button>
+          <button
+            type="button"
+            onPointerDown={stopDrag}
+            onClick={onDuplicate}
+            className="rounded p-1 text-black/50 hover:bg-black/5 hover:text-black/80 dark:text-white/50 dark:hover:bg-white/10 dark:hover:text-white/80"
+            aria-label="Duplicar demanda"
+          >
+            <CopyIcon />
           </button>
           <button
             type="button"
@@ -89,6 +99,19 @@ function PencilIcon() {
       <path d="M12 20h9" strokeLinecap="round" strokeLinejoin="round" />
       <path
         d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function CopyIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <rect x="9" y="9" width="13" height="13" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

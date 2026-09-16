@@ -11,9 +11,16 @@ type Props = {
   tasks: Task[];
   onEditTask: (task: Task) => void;
   onDeleteTask: (task: Task) => void;
+  onDuplicateTask: (task: Task) => void;
 };
 
-export default function SwimlaneCell({ cellKey, tasks, onEditTask, onDeleteTask }: Props) {
+export default function SwimlaneCell({
+  cellKey,
+  tasks,
+  onEditTask,
+  onDeleteTask,
+  onDuplicateTask,
+}: Props) {
   const { setNodeRef, isOver } = useDroppable({ id: cellDroppableId(cellKey) });
   const ids = tasks.map((t) => t.id);
 
@@ -31,6 +38,7 @@ export default function SwimlaneCell({ cellKey, tasks, onEditTask, onDeleteTask 
             task={task}
             onEdit={() => onEditTask(task)}
             onDelete={() => onDeleteTask(task)}
+            onDuplicate={() => onDuplicateTask(task)}
           />
         ))}
       </SortableContext>
