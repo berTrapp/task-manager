@@ -135,6 +135,50 @@ export async function updateTask(
   });
 }
 
+export async function duplicateTask(groupId: string, id: string): Promise<ActionResult<Task>> {
+  return runGroupAction(groupId, async () => {
+    const supabase = getSupabaseServerClient();
+    const { data: original, error: fetchError } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("id", id)
+      .eq("group_id", groupId)
+      .single();
+
+    if (fetchError) return { ok: false, error: fetchError.message };
+
+    let countQuery = supabase
+      .from("tasks")
+      .select("id", { count: "exact", head: true })
+      .eq("group_id", groupId)
+      .eq("status", original.status);
+    countQuery = original.assignee_id
+      ? countQuery.eq("assignee_id", original.assignee_id)
+      : countQuery.is("assignee_id", null);
+    const { count } = await countQuery;
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .insert({
+        group_id: groupId,
+        description: original.description,
+        requester: original.requester,
+        assignee_id: original.assignee_id,
+        urgency: original.urgency,
+        observations: original.observations,
+        status: original.status,
+        position: count ?? 0,
+      })
+      .select("*")
+      .single();
+
+    if (error) return { ok: false, error: error.message };
+
+    revalidatePath(`/groups/${groupId}`);
+    return { ok: true, data: data as Task };
+  });
+}
+
 export async function deleteTask(groupId: string, id: string): Promise<ActionResult> {
   return runGroupAction(groupId, async () => {
     const supabase = getSupabaseServerClient();

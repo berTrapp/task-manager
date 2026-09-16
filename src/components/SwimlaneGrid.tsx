@@ -9,6 +9,7 @@ type Props = {
   tasks: Task[];
   onEditTask: (task: Task) => void;
   onDeleteTask: (task: Task) => void;
+  onDuplicateTask: (task: Task) => void;
 };
 
 const UNASSIGNED = "unassigned";
@@ -17,7 +18,13 @@ export function swimlaneCellKey(assigneeId: string | null, status: string) {
   return `${assigneeId ?? UNASSIGNED}::${status}`;
 }
 
-export default function SwimlaneGrid({ members, tasks, onEditTask, onDeleteTask }: Props) {
+export default function SwimlaneGrid({
+  members,
+  tasks,
+  onEditTask,
+  onDeleteTask,
+  onDuplicateTask,
+}: Props) {
   const rows = useMemo(() => {
     const byAssignee = new Map<string, Task[]>();
     for (const task of tasks) {
@@ -67,6 +74,7 @@ export default function SwimlaneGrid({ members, tasks, onEditTask, onDeleteTask 
                 tasks={row.tasks.filter((t) => t.status === status)}
                 onEditTask={onEditTask}
                 onDeleteTask={onDeleteTask}
+                onDuplicateTask={onDuplicateTask}
               />
             ))}
           </div>

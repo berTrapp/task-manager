@@ -13,7 +13,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import { deleteTask, reorderTasks } from "@/app/actions";
+import { deleteTask, duplicateTask, reorderTasks } from "@/app/actions";
 import { computeCellDrop } from "@/lib/kanban-dnd";
 import { useGroupRealtimeTasks } from "@/hooks/useGroupRealtimeTasks";
 import type { GroupMember, Task, TaskStatus } from "@/lib/types";
@@ -148,6 +148,15 @@ export default function GroupBoard({
     setDeleteTarget(null);
   }
 
+  async function handleDuplicate(task: Task) {
+    const result = await duplicateTask(groupId, task.id);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setTasks((prev) => [...prev, result.data]);
+  }
+
   function openCreateModal() {
     setModalState({
       mode: "create",
@@ -224,6 +233,7 @@ export default function GroupBoard({
             tasks={tasks}
             onEditTask={(task) => setModalState({ mode: "edit", task })}
             onDeleteTask={(task) => setDeleteTarget(task)}
+            onDuplicateTask={handleDuplicate}
           />
         ) : (
           <UserTabsBoard
@@ -233,6 +243,7 @@ export default function GroupBoard({
             onSelectUser={setSelectedUserId}
             onEditTask={(task) => setModalState({ mode: "edit", task })}
             onDeleteTask={(task) => setDeleteTarget(task)}
+            onDuplicateTask={handleDuplicate}
             onAddTask={(status) =>
               setModalState({
                 mode: "create",
@@ -245,7 +256,13 @@ export default function GroupBoard({
 
         <DragOverlay>
           {activeTask ? (
-            <TaskCard task={activeTask} onEdit={() => {}} onDelete={() => {}} dragging />
+            <TaskCard
+              task={activeTask}
+              onEdit={() => {}}
+              onDelete={() => {}}
+              onDuplicate={() => {}}
+              dragging
+            />
           ) : null}
         </DragOverlay>
       </DndContext>
