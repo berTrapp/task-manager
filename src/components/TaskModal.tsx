@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createTask, updateTask } from "@/app/actions";
 import {
   STATUS_LABELS,
@@ -17,6 +17,7 @@ import {
 type Props = {
   groupId: string;
   members: GroupMember[];
+  tasks: Task[];
   mode: "create" | "edit";
   task?: Task;
   initialStatus?: TaskStatus;
@@ -28,6 +29,7 @@ type Props = {
 export default function TaskModal({
   groupId,
   members,
+  tasks,
   mode,
   task,
   initialStatus,
@@ -45,6 +47,15 @@ export default function TaskModal({
   const [observations, setObservations] = useState(task?.observations ?? "");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  const requesterOptions = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const t of tasks) {
+      const key = t.requester.trim().toLowerCase();
+      if (key && !seen.has(key)) seen.set(key, t.requester.trim());
+    }
+    return [...seen.values()].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }, [tasks]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -115,9 +126,15 @@ export default function TaskModal({
               value={requester}
               onChange={(e) => setRequester(e.target.value)}
               required
+              list="requester-options"
               className={inputClass}
               placeholder="Quem pediu essa demanda?"
             />
+            <datalist id="requester-options">
+              {requesterOptions.map((name) => (
+                <option key={name} value={name} />
+              ))}
+            </datalist>
           </Field>
 
           <Field label="Responsável">

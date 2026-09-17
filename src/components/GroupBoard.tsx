@@ -271,6 +271,7 @@ export default function GroupBoard({
         <TaskModal
           groupId={groupId}
           members={members}
+          tasks={tasks}
           mode={modalState.mode}
           task={modalState.mode === "edit" ? modalState.task : undefined}
           initialStatus={modalState.mode === "create" ? modalState.status : undefined}
