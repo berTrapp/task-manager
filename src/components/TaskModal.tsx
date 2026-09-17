@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createTask, updateTask } from "@/app/actions";
 import {
   STATUS_LABELS,
@@ -47,6 +47,7 @@ export default function TaskModal({
   const [observations, setObservations] = useState(task?.observations ?? "");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   const requesterOptions = useMemo(() => {
     const seen = new Map<string, string>();
@@ -64,6 +65,10 @@ export default function TaskModal({
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  useEffect(() => {
+    descriptionRef.current?.focus();
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -112,6 +117,7 @@ export default function TaskModal({
         <form onSubmit={handleSubmit} className="mt-4 space-y-3">
           <Field label="Descrição">
             <textarea
+              ref={descriptionRef}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
