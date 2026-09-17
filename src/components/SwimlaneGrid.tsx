@@ -1,12 +1,22 @@
 "use client";
 
 import { useMemo } from "react";
-import { TASK_STATUSES, STATUS_LABELS, displayName, type GroupMember, type Task } from "@/lib/types";
+import {
+  TASK_STATUSES,
+  STATUS_LABELS,
+  displayName,
+  type GroupMember,
+  type Task,
+  type TaskStatus,
+} from "@/lib/types";
 import SwimlaneCell from "./SwimlaneCell";
+import ChevronIcon from "./ChevronIcon";
 
 type Props = {
   members: GroupMember[];
   tasks: Task[];
+  collapsedStatuses?: Set<TaskStatus>;
+  onToggleCollapse?: (status: TaskStatus) => void;
   onEditTask: (task: Task) => void;
   onDeleteTask: (task: Task) => void;
   onDuplicateTask: (task: Task) => void;
@@ -21,6 +31,8 @@ export function swimlaneCellKey(assigneeId: string | null, status: string) {
 export default function SwimlaneGrid({
   members,
   tasks,
+  collapsedStatuses,
+  onToggleCollapse,
   onEditTask,
   onDeleteTask,
   onDuplicateTask,
@@ -56,8 +68,18 @@ export default function SwimlaneGrid({
         {TASK_STATUSES.map((status) => (
           <div
             key={status}
-            className="rounded-md bg-black/[.03] px-3 py-2 text-sm font-semibold dark:bg-white/[.05]"
+            className="flex items-center gap-1.5 rounded-md bg-black/[.03] px-3 py-2 text-sm font-semibold dark:bg-white/[.05]"
           >
+            {onToggleCollapse && (
+              <button
+                type="button"
+                onClick={() => onToggleCollapse(status)}
+                className="rounded p-0.5 text-black/40 hover:bg-black/10 hover:text-black/70 dark:text-white/40 dark:hover:bg-white/10 dark:hover:text-white/70"
+                aria-label={collapsedStatuses?.has(status) ? "Expandir coluna" : "Recolher coluna"}
+              >
+                <ChevronIcon direction={collapsedStatuses?.has(status) ? "down" : "up"} />
+              </button>
+            )}
             {STATUS_LABELS[status]}
           </div>
         ))}
@@ -72,6 +94,7 @@ export default function SwimlaneGrid({
                 key={status}
                 cellKey={swimlaneCellKey(row.key === UNASSIGNED ? null : row.key, status)}
                 tasks={row.tasks.filter((t) => t.status === status)}
+                collapsed={collapsedStatuses?.has(status)}
                 onEditTask={onEditTask}
                 onDeleteTask={onDeleteTask}
                 onDuplicateTask={onDuplicateTask}

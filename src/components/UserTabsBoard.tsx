@@ -11,6 +11,8 @@ type Props = {
   tasks: Task[];
   selectedUserId: string;
   onSelectUser: (userId: string) => void;
+  collapsedStatuses?: Set<TaskStatus>;
+  onToggleCollapse?: (status: TaskStatus) => void;
   onEditTask: (task: Task) => void;
   onDeleteTask: (task: Task) => void;
   onDuplicateTask: (task: Task) => void;
@@ -22,6 +24,8 @@ export default function UserTabsBoard({
   tasks,
   selectedUserId,
   onSelectUser,
+  collapsedStatuses,
+  onToggleCollapse,
   onEditTask,
   onDeleteTask,
   onDuplicateTask,
@@ -72,6 +76,8 @@ export default function UserTabsBoard({
             key={status}
             status={status}
             tasks={columns[status]}
+            collapsed={collapsedStatuses?.has(status)}
+            onToggleCollapse={onToggleCollapse ? () => onToggleCollapse(status) : undefined}
             onEditTask={onEditTask}
             onDeleteTask={onDeleteTask}
             onDuplicateTask={onDuplicateTask}

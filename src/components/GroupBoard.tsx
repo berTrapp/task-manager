@@ -16,6 +16,7 @@ import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { deleteTask, duplicateTask, reorderTasks } from "@/app/actions";
 import { computeCellDrop } from "@/lib/kanban-dnd";
 import { useGroupRealtimeTasks } from "@/hooks/useGroupRealtimeTasks";
+import { useCollapsedStatuses } from "@/hooks/useCollapsedStatuses";
 import type { GroupMember, Task, TaskStatus } from "@/lib/types";
 import SwimlaneGrid, { swimlaneCellKey } from "./SwimlaneGrid";
 import UserTabsBoard from "./UserTabsBoard";
@@ -58,6 +59,7 @@ export default function GroupBoard({
   const [deletePending, setDeletePending] = useState(false);
   const [membersPanelOpen, setMembersPanelOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [collapsedStatuses, toggleCollapse] = useCollapsedStatuses(groupId);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -231,6 +233,8 @@ export default function GroupBoard({
           <SwimlaneGrid
             members={members}
             tasks={tasks}
+            collapsedStatuses={collapsedStatuses}
+            onToggleCollapse={toggleCollapse}
             onEditTask={(task) => setModalState({ mode: "edit", task })}
             onDeleteTask={(task) => setDeleteTarget(task)}
             onDuplicateTask={handleDuplicate}
@@ -241,6 +245,8 @@ export default function GroupBoard({
             tasks={tasks}
             selectedUserId={selectedUserId}
             onSelectUser={setSelectedUserId}
+            collapsedStatuses={collapsedStatuses}
+            onToggleCollapse={toggleCollapse}
             onEditTask={(task) => setModalState({ mode: "edit", task })}
             onDeleteTask={(task) => setDeleteTarget(task)}
             onDuplicateTask={handleDuplicate}
